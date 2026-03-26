@@ -1,6 +1,6 @@
 <div align="center">
 
-# C-MAP
+# CMDPAD
 
 [**中文**](./README_zh.md) | [**English**](./README.md)
 
