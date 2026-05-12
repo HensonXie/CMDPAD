@@ -115,4 +115,18 @@ Train using direct concatenation fusion:
 python ./model/dialogue_train_from_cls.py
 
 ```
+## 🤝 Citation
+
+If you find this code useful for your research, please cite our paper (**Accepted by Pattern Recognition**):
+
+```bibtex
+@article{zhou2026cmdpad,
+  title={CMDPAD: A Chinese multimodal dynamic personality and affect dataset for affect prediction in conversations},
+  author={Zhou, Zisen and Xie, Heng and Wen, Chang and Liu, Xuefei and Tao, Jianhua and Wen, Zhengqi and Li, Changsheng and Lian, Zheng and Zhao, Jinming and Xiong, Bingsen and others},
+  journal={Pattern Recognition},
+  pages={113822},
+  year={2026},
+  publisher={Elsevier}
+}
+```
 
