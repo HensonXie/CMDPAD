@@ -100,3 +100,24 @@ python ./model/dialogue_feature_extractor.py
 python ./model/dialogue_train_from_cls.py
 
 ```
+## 🤝 引用
+
+如果该工作对您的研究有用，请引用我们的论文（**已被 Pattern Recognition 接收**）：
+
+```bibtex
+
+@article{zhou2026cmdpad,
+
+title={CMDPAD: A Chinese multimodal dynamic personality and affect dataset for affect prediction in conversations},
+
+author={Zhou, Zisen and Xie, Heng and Wen, Chang and Liu, Xuefei and Tao, Jianhua and Wen, Zhengqi and Li, Changsheng and Lian, Zheng and Zhao, Jinming and Xiong, Bingsen and others},
+
+journal={Pattern Recognition},
+
+pages={113822},
+
+year={2026},
+
+publisher={Elsevier}
+
+}```
