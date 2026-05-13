@@ -9,115 +9,117 @@
 ---
 
 
+[![Paper](https://img.shields.io/badge/Paper-Pattern%20Recognition-blue)](#) [![Dataset](https://img.shields.io/badge/Dataset-Available-green)](#) 
 
-### 项目介绍
+本仓库包含了发表在 *Pattern Recognition* 上的论文 **"CMDPAD: A Chinese multimodal dynamic personality and affect dataset for affect prediction in conversations"** 的官方 PyTorch 实现代码。
 
+## 💡项目介绍
 本项目致力于**多模态对话分析**，重点关注**情感识别**、**人格识别**以及**情感预测**任务。项目包含一个全新的中文多模态数据集，并提供了基线模型代码。
 
-### 🛠️ 环境安装
+相比于仅停留在识别说话者当前情绪的传统ARC（对话情感识别）任务，APC（对话情感预测）任务实现了视角的转换，将核心聚焦于预测听众在接收信息后可能产生的情感反馈 。这种机制高度契合人类在动态交互中的真实社交认知逻辑，从而为赋予和量化评估AI智能体的类人情感智能提供了一条更具前瞻性的多模态情感预测研究路径。
 
-本项目基于 Python 3.8+ 和 PyTorch 2.0.0 开发。请使用以下命令安装依赖：
+## 🚀 核心架构与方法
+基线方法提出一种多模态注意力 Transformer (Multi-modal Attention Transformer, MAT) 基准模型。特征提取与融合框架如下：
+* **多模态特征**：文本 (BERT-Chinese)、音频 (Wav2Vec系列)、视觉 (ViT, ConvNeXt)。
+* **单轮编码**：使用 Transformer Encoder 作为全局聚合器，通过 Self-Attention 学习模态间的交叉依赖，提取 `[CLS]` 级表征。
+* **双轮预测**：使用 Cross-Attention 机制，结合说话人 A 的历史情感与人格（AR+PR）以及听话人 B 的上下文进行双向交叉注意力交互，预测 B 的未来情感状态（AP）。
 
-```bash
-pip install -r requirements.txt
-
+## 📂 仓库结构
+```text
+src/
+├── config.py                           # 全局参数、路径与模态配置
+├── dataset.py                          # PyTorch Dataset 与 Dataloader 实现
+├── eval_metrics.py                     # 评估指标 (MAE, F1, Acc-5 等)
+├── model.py                            # 核心网络: MAT 单轮多模态基准模型
+├── main.py                             # 单轮任务训练脚本 (AR, PR, AP)
+├── dialogue_feature_extractor.py       # 双轮特征提取器 (两模型级联)
+├── dialogue_feature_extractor_multi.py # 双轮特征提取器 (多模型融合: AR+PR+AP)
+└── dialogue_train_from_cls.py          # 最终的对话情感预测级联训练脚本
 ```
 
-**核心依赖库 (`requirements.txt`):**
-（请参考英文版中的依赖列表，包含了 PyTorch, Transformers, FunASR, Whisper, Librosa 等关键库）。
+## ⚙️ 环境依赖
 
-### 📂 目录结构说明
+建议使用 Python 3.8+ 及 PyTorch 1.12+。
 
-
-* **数据目录 (`./data`)**
-* `raw/`: 原始视频/音频数据存放位置
-* `label_random.csv`: 标签文件
-* `multimodal_features.pkl`: 提取后的多模态特征文件
-* `features/features_summary.csv`: 特征格式说明文件
-
-
-* **预处理目录 (`./preprocessing`)**
-* `feature_extract/main.py`: **[核心]** 提取三模态特征并进行视频分帧
-* `detection_multimodal.py`: 数据分离、语音转录文本（ASR）
-* `test.py`: 数据完整性检查（校验三模态数据量是否匹配）
-
-
-* **模型目录 (`./model`)**
-* `main.py`: **[单轮]** 单轮对话任务主程序
-* `dialogue_train_from_cls`: **[多轮]** 单轮对话任务主程序
-
-
-
-### 🚀 运行步骤
-
-#### 1. 特征处理
-
-首先在配置文件中设置数据路径、视频分帧数以及预训练模型路径。
-运行以下命令提取三模态特征：
-
-```bash
-python ./preprocessing/feature_extract/main.py
+Bash
 
 ```
-
-#### 2. 数据筛选与文本转录
-
-进行数据清洗、分离以及音频转文本操作：
-
-```bash
-python ./preprocessing/detection_multimodal.py
-
+pip install torch torchvision torchaudio
+pip install pandas numpy scikit-learn
 ```
 
-运行测试脚本，确保三模态数据对其且数量一致：
+## 📊 数据准备
 
-```bash
-python ./preprocessing/test.py
+请从 [[数据集链接](https://huggingface.co/datasets/HensonXie/CMDPAD)] 下载数据集，并将其放置在 `./dataset/` 目录下。所需文件包括：
 
-```
+- 单轮数据：`multimodal_features_single.pkl`, `label_single.csv`
+- 双轮数据：`multimodal_features_paired.pkl`, `label_paired.csv`
 
-#### 3. 模型训练
+（路径可在 `src/config.py` 中修改）。
 
-**任务 A：单轮对话任务**
-直接运行主程序进行训练/测试：
+## 🏃 快速开始 (Pipeline)
 
-```bash
-python ./model/main.py
+本项目的训练分为三个阶段：
 
-```
+### 阶段 1：训练单轮基准模型
 
-**任务 B：多轮对话情感预测**
+分别训练情感识别 (AR)、动态人格识别 (PR) 和情感预测 (AP) 模型。
 
-1. 提取上轮对话特征：
-```bash
-python ./model/dialogue_feature_extractor.py
+Bash
 
 ```
+# 训练情感识别模型 (Affect Recognition)
+python src/main.py --task affect_recognition --modalities bert-base-chinese wav2vec2-large-robust-emotion convnext-base
 
+# 训练人格识别模型 (Personality Recognition)
+python src/main.py --task personality_recognition --modalities bert-base-chinese wav2vec2-large-robust-emotion convnext-base
 
-2. 使用 Concat 方式融合并训练：
-```bash
-python ./model/dialogue_train_from_cls.py
+# 训练情感预测模型 (Affect Prediction)
+python src/main.py --task affect_prediction --modalities bert-base-chinese wav2vec2-large-xlsr-chinese convnext-base
+```
+
+### 阶段 2：提取对话级上下文特征 (Cache CLS)
+
+利用训练好的单轮模型，提取说话人 A 和 B 的 `[CLS]` 融合特征并缓存，以加速后续的双轮级联训练。
+
+Bash
 
 ```
+# 以 AR + PR + AP 模型提取双轮特征为例
+python src/dialogue_feature_extractor_multi.py \
+    --features ./dataset/multimodal_features_paired.pkl \
+    --labels ./dataset/label_paired.csv \
+    --model_A_aff ./saved_models/affect_recognition__bert-base-chinese...pt \
+    --model_A_per ./saved_models/personality_recognition__bert-base-chinese...pt \
+    --model_B ./saved_models/affect_prediction__bert-base-chinese...pt \
+    --out_cache ./dataset/dialogue_cls_multi.pkl
+```
+
+### 阶段 3：训练对话情感融合预测器
+
+基于缓存的双方 `[CLS]` 特征，训练最终的 Cross-Attention 融合网络。
+
+Bash
+
+```
+python src/dialogue_train_from_cls.py \
+    --cls_cache ./dataset/dialogue_cls_multi.pkl \
+    --label_cols valence_prediction \
+    --epochs 40 \
+    --device cuda
+```
+
 ## 🤝 引用
 
 如果该工作对您的研究有用，请引用我们的论文（**已被 Pattern Recognition 接收**）：
 
-```bibtex
-
+```
 @article{zhou2026cmdpad,
-
-title={CMDPAD: A Chinese multimodal dynamic personality and affect dataset for affect prediction in conversations},
-
-author={Zhou, Zisen and Xie, Heng and Wen, Chang and Liu, Xuefei and Tao, Jianhua and Wen, Zhengqi and Li, Changsheng and Lian, Zheng and Zhao, Jinming and Xiong, Bingsen and others},
-
-journal={Pattern Recognition},
-
-pages={113822},
-
-year={2026},
-
-publisher={Elsevier}
-
-}```
+  title={CMDPAD: A Chinese multimodal dynamic personality and affect dataset for affect prediction in conversations},
+  author={Zhou, Zisen and Xie, Heng and Wen, Chang and Liu, Xuefei and Tao, Jianhua and Wen, Zhengqi and Li, Changsheng and Lian, Zheng and Zhao, Jinming and Xiong, Bingsen and others},
+  journal={Pattern Recognition},
+  pages={113822},
+  year={2026},
+  publisher={Elsevier}
+}
+```
