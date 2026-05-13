@@ -7,117 +7,110 @@
 </div>
 
 ---
+[![Paper](https://img.shields.io/badge/Paper-Pattern%20Recognition-blue)](#) [![Dataset](https://img.shields.io/badge/Dataset-Available-green)](#) 
 
-### Introduction
+This repository contains the official PyTorch implementation for the paper **"CMDPAD: A Chinese multimodal dynamic personality and affect dataset for affect prediction in conversations"**, published in *Pattern Recognition*.
 
-This project focuses on **Multimodal Conversational Analysis**, specifically targeting **Affect Recognition**, **Personality Recognition**, and **Affect Prediction** in multi-turn dialogues. It introduces a novel multimodal dataset and establishes baseline model.
+## 💡 Project Introduction
 
-### 🛠️ Environment Requirements
+This project focuses on **multimodal dialogue analysis**, with an emphasis on **affect recognition**, **personality recognition**, and **affect prediction** tasks. The repository includes a novel Chinese multimodal dataset and provides baseline model code.
 
-The code is tested with Python 3.8+ and PyTorch 2.0.0. To install the necessary dependencies, run:
+Compared to traditional ARC (Affect Recognition in Conversations) tasks that merely identify the speaker's current emotion, the APC (Affect Prediction in Conversations) task shifts the perspective by focusing on predicting the emotional feedback a listener is likely to generate after receiving information. This mechanism highly aligns with the real social cognitive logic of humans in dynamic interactions, thereby providing a more forward-looking, multimodal affect prediction research path for endowing and quantitatively evaluating the human-like emotional intelligence of AI agents.
 
-```bash
-pip install -r requirements.txt
+## 🚀 Core Architecture & Methodology
 
-```
+The baseline method proposes a Multi-modal Attention Transformer (MAT) benchmark model. The feature extraction and fusion framework is as follows:
 
-**Core Dependencies (`requirements.txt`):**
+* **Multimodal Features**: Text (BERT-Chinese), Audio (Wav2Vec series), Visual (ViT, ConvNeXt).
+* **Single-Turn Encoding**: Employs a Transformer Encoder as a global aggregator to learn cross-modal dependencies via Self-Attention and extract `[CLS]` level representations.
+* **Dialogue-Based (Two-Turn) Prediction**: Utilizes a Cross-Attention mechanism to conduct bi-directional cross-attention interaction, combining Speaker A's historical affect and personality (AR+PR) with Listener B's context to predict B's future affective state (AP).
 
-```text
-torch==2.0.0
-torchaudio==2.0.1
-torchvision==0.15.1
-transformers==4.46.3
-numpy==1.24.4
-pandas==2.0.3
-scikit-learn==1.3.2
-opencv-python==4.12.0.88
-librosa==0.11.0
-moviepy==1.0.3
-openai-whisper==20250625
-funasr==1.2.7
-modelscope==1.11.0
-hydra-core==1.3.2
-einops==0.8.1
-tqdm==4.67.1
-
-```
-
-### 📂 Project Structure
+## 📂 Repository Structure
 
 ```text
-.
-├── data/                        # Dataset Root
-│   ├── raw/                     # Original video/audio data
-│   ├── label_random.csv         # Labels
-│   ├── multimodal_features.pkl  # Extracted features
-│   └── features/
-│       └── features_summary.csv # Feature format summary
-├── preprocessing/               # Feature Extraction & Data Processing
-│   ├── feature_extract/         # Feature extraction scripts
-│   ├── detection_multimodal.py  # Transcription & Data splitting
-│   └── check.py                  # Data integrity check
-└── model/                       # Model Training & Inference
-    ├── main.py                  # Single-turn dialogue tasks
-    └── ...                      # Multi-turn strategies scripts
+src/
+├── config.py                           # Global parameters, paths, and modality configurations
+├── dataset.py                          # PyTorch Dataset and Dataloader implementation
+├── eval_metrics.py                     # Evaluation metrics (MAE, F1, Acc-5, etc.)
+├── model.py                            # Core network: MAT single-turn multimodal baseline model
+├── main.py                             # Single-turn task training script (AR, PR, AP)
+├── dialogue_feature_extractor.py       # Two-turn feature extractor (two-model cascade)
+├── dialogue_feature_extractor_multi.py # Two-turn feature extractor (multi-model fusion: AR+PR+AP)
+└── dialogue_train_from_cls.py          # Final cascaded training script for dialogue affect prediction
 
 ```
 
-### 🚀 Usage
+## ⚙️ Environment Dependencies
 
-#### 1. Feature Processing
-
-Configure data paths, video framing settings, and pre-trained model selection in the config, then run feature extraction:
+Python 3.8+ and PyTorch 1.12+ are recommended.
 
 ```bash
-python ./preprocessing/feature_extract/main.py
+pip install torch torchvision torchaudio
+pip install pandas numpy scikit-learn
 
 ```
 
-#### 2. Data Screening & Transcription
+## 📊 Data Preparation
 
-Perform data splitting, audio transcription (ASR), and text generation:
+Please download the dataset from [[Dataset Link](https://huggingface.co/datasets/HensonXie/CMDPAD)] and place it in the `./dataset/` directory. Required files include:
+
+* Single-turn data: `multimodal_features_single.pkl`, `label_single.csv`
+* Paired (Dialogue) data: `multimodal_features_paired.pkl`, `label_paired.csv`
+
+*(Paths can be modified in `src/config.py`).*
+
+## 🏃 Quick Start (Pipeline)
+
+The training process of this project is divided into three stages:
+
+### Stage 1: Train Single-Turn Baseline Models
+
+Train the Affect Recognition (AR), Dynamic Personality Recognition (PR), and Affect Prediction (AP) models separately.
 
 ```bash
-python ./preprocessing/detection_multimodal.py
+# Train Affect Recognition Model
+python src/main.py --task affect_recognition --modalities bert-base-chinese wav2vec2-large-robust-emotion convnext-base
+
+# Train Personality Recognition Model
+python src/main.py --task personality_recognition --modalities bert-base-chinese wav2vec2-large-robust-emotion convnext-base
+
+# Train Affect Prediction Model
+python src/main.py --task affect_prediction --modalities bert-base-chinese wav2vec2-large-xlsr-chinese convnext-base
 
 ```
 
-Check if the data quantity matches across three modalities (Audio/Visual/Text):
+### Stage 2: Extract Dialogue-Level Context Features (Cache CLS)
+
+Utilize the trained single-turn models to extract and cache the `[CLS]` fused features of Speakers A and B to accelerate subsequent cascaded training for dialogue tasks.
 
 ```bash
-python ./preprocessing/test.py
+# Example: Extract two-turn features using the AR + PR + AP models
+python src/dialogue_feature_extractor_multi.py \
+    --features ./dataset/multimodal_features_paired.pkl \
+    --labels ./dataset/label_paired.csv \
+    --model_A_aff ./saved_models/affect_recognition__bert-base-chinese...pt \
+    --model_A_per ./saved_models/personality_recognition__bert-base-chinese...pt \
+    --model_B ./saved_models/affect_prediction__bert-base-chinese...pt \
+    --out_cache ./dataset/dialogue_cls_multi.pkl
 
 ```
 
-#### 3. Model Training
+### Stage 3: Train Dialogue Affect Fusion Predictor
 
-**A. Single-turn Dialogue Tasks**
-Run the baseline model for single-turn tasks directly:
+Based on the cached `[CLS]` features of both parties, train the final Cross-Attention fusion network.
 
 ```bash
-python ./model/main.py
+python src/dialogue_train_from_cls.py \
+    --cls_cache ./dataset/dialogue_cls_multi.pkl \
+    --label_cols valence_prediction \
+    --epochs 40 \
+    --device cuda
 
 ```
 
-**B. Multi-turn Dialogue (Affect Prediction)**
-Extract features from the previous turn (Context):
-
-```bash
-# Standard feature selection
-python ./model/dialogue_feature_extractor.py
-
-```
-
-
-Train using direct concatenation fusion:
-```bash
-python ./model/dialogue_train_from_cls.py
-
-```
 ## 🤝 Citation
 
-If you find this code useful for your research, please cite our paper (**Accepted by Pattern Recognition**):
+If you find this work useful for your research, please cite our paper (**Accepted by Pattern Recognition**):
 
 ```bibtex
 @article{zhou2026cmdpad,
@@ -128,5 +121,5 @@ If you find this code useful for your research, please cite our paper (**Accepte
   year={2026},
   publisher={Elsevier}
 }
-```
 
+```
