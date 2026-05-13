@@ -11,20 +11,20 @@
 
 [![Paper](https://img.shields.io/badge/Paper-Pattern%20Recognition-blue)](#) [![Dataset](https://img.shields.io/badge/Dataset-Available-green)](#) 
 
-本仓库包含了发表在 *Pattern Recognition* 上的论文 **"CMDPAD: A Chinese multimodal dynamic personality and affect dataset for affect prediction in conversations"** 的官方 PyTorch 实现代码。
+本仓库包含了发表在 *Pattern Recognition* 上的论文 **"[CMDPAD: A Chinese multimodal dynamic personality and affect dataset for affect prediction in conversations](https://www.sciencedirect.com/science/article/abs/pii/S0031320326007879)"** 的官方 PyTorch 实现代码。
 
 ## 💡项目介绍
 本项目致力于**多模态对话分析**，重点关注**情感识别**、**人格识别**以及**情感预测**任务。项目包含一个全新的中文多模态数据集，并提供了基线模型代码。
 
 相比于仅停留在识别说话者当前情绪的传统ARC（对话情感识别）任务，APC（对话情感预测）任务实现了视角的转换，将核心聚焦于预测听众在接收信息后可能产生的情感反馈 。这种机制高度契合人类在动态交互中的真实社交认知逻辑，从而为赋予和量化评估AI智能体的类人情感智能提供了一条更具前瞻性的多模态情感预测研究路径。
 
-## 🚀 核心架构与方法
+## 🌟 核心架构
 基线方法提出一种多模态注意力 Transformer (Multi-modal Attention Transformer, MAT) 基准模型。特征提取与融合框架如下：
 * **多模态特征**：文本 (BERT-Chinese)、音频 (Wav2Vec系列)、视觉 (ViT, ConvNeXt)。
 * **单轮编码**：使用 Transformer Encoder 作为全局聚合器，通过 Self-Attention 学习模态间的交叉依赖，提取 `[CLS]` 级表征。
 * **双轮预测**：使用 Cross-Attention 机制，结合说话人 A 的历史情感与人格（AR+PR）以及听话人 B 的上下文进行双向交叉注意力交互，预测 B 的未来情感状态（AP）。
 
-## 📂 仓库结构
+## 📂 项目结构
 ```text
 src/
 ├── config.py                           # 全局参数、路径与模态配置
