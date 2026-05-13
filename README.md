@@ -9,7 +9,7 @@
 ---
 [![Paper](https://img.shields.io/badge/Paper-Pattern%20Recognition-blue)](#) [![Dataset](https://img.shields.io/badge/Dataset-Available-green)](#) 
 
-This repository contains the official PyTorch implementation for the paper **"CMDPAD: A Chinese multimodal dynamic personality and affect dataset for affect prediction in conversations"**, published in *Pattern Recognition*.
+This repository contains the official PyTorch implementation for the paper **"[CMDPAD: A Chinese multimodal dynamic personality and affect dataset for affect prediction in conversations](https://www.sciencedirect.com/science/article/abs/pii/S0031320326007879)"**, published in *Pattern Recognition*.
 
 ## 💡 Project Introduction
 
@@ -17,7 +17,7 @@ This project focuses on **multimodal dialogue analysis**, with an emphasis on **
 
 Compared to traditional ARC (Affect Recognition in Conversations) tasks that merely identify the speaker's current emotion, the APC (Affect Prediction in Conversations) task shifts the perspective by focusing on predicting the emotional feedback a listener is likely to generate after receiving information. This mechanism highly aligns with the real social cognitive logic of humans in dynamic interactions, thereby providing a more forward-looking, multimodal affect prediction research path for endowing and quantitatively evaluating the human-like emotional intelligence of AI agents.
 
-## 🚀 Core Architecture & Methodology
+## 🌟 Core Architecture
 
 The baseline method proposes a Multi-modal Attention Transformer (MAT) benchmark model. The feature extraction and fusion framework is as follows:
 
@@ -25,7 +25,7 @@ The baseline method proposes a Multi-modal Attention Transformer (MAT) benchmark
 * **Single-Turn Encoding**: Employs a Transformer Encoder as a global aggregator to learn cross-modal dependencies via Self-Attention and extract `[CLS]` level representations.
 * **Dialogue-Based (Two-Turn) Prediction**: Utilizes a Cross-Attention mechanism to conduct bi-directional cross-attention interaction, combining Speaker A's historical affect and personality (AR+PR) with Listener B's context to predict B's future affective state (AP).
 
-## 📂 Repository Structure
+## 📂 Project Structure
 
 ```text
 src/
@@ -52,7 +52,7 @@ pip install pandas numpy scikit-learn
 
 ## 📊 Data Preparation
 
-Please download the dataset from [[Dataset Link](https://huggingface.co/datasets/HensonXie/CMDPAD)] and place it in the `./dataset/` directory. Required files include:
+Please download the dataset from [Dataset Link](https://huggingface.co/datasets/HensonXie/CMDPAD) and place it in the `./dataset/` directory. Required files include:
 
 * Single-turn data: `multimodal_features_single.pkl`, `label_single.csv`
 * Paired (Dialogue) data: `multimodal_features_paired.pkl`, `label_paired.csv`
