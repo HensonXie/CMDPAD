@@ -113,15 +113,13 @@ python src/dialogue_train_from_cls.py \
 If you find this work useful for your research, please cite our paper (**Accepted by Pattern Recognition**):
 
 ```bibtex
-@article{ZHOU2026113822,
-    title = {CMDPAD: A Chinese multimodal dynamic personality and affect dataset for affect prediction in conversations},
-    journal = {Pattern Recognition},
-    volume = {179},
-    pages = {113822},
-    year = {2026},
-    issn = {0031-3203},
-    doi = {https://doi.org/10.1016/j.patcog.2026.113822},
-    author = {Zisen Zhou and Heng Xie and Chang Wen and Xuefei Liu and Jianhua Tao and Zhengqi Wen and Changsheng Li and Zheng Lian and Jinming Zhao and Bingsen Xiong and Shaozheng Qin},
+@article{zhou2026cmdpad,
+  title={CMDPAD: A Chinese multimodal dynamic personality and affect dataset for affect prediction in conversations},
+  author={Zhou, Zisen and Xie, Heng and Wen, Chang and Liu, Xuefei and Tao, Jianhua and Wen, Zhengqi and Li, Changsheng and Lian, Zheng and Zhao, Jinming and Xiong, Bingsen and Qin, Shaozheng},
+  journal={Pattern Recognition},
+  pages={113822},
+  year={2026},
+  publisher={Elsevier}
 }
 
 ```
